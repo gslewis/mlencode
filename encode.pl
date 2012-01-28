@@ -243,7 +243,9 @@ sub encoder {
         my @cmd = $ENCODERS->{$format}($infile, $outfile, $settings);
         system @cmd;
 
-        unlink $infile if $config->{'wav_delete'} eq $format;
+        if ($config->{'wav_delete'} eq $format) {
+            unlink $infile or die "Failed to delete $infile: $!";
+        }
     }
 
     system('cp', $data_file, $album_dir);

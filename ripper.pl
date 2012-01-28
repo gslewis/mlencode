@@ -85,6 +85,7 @@ use strict;
 use File::Copy;
 use File::Spec;
 use File::Path;
+use Cwd;
 
 my $config_file = $ENV{'RIPPER_CFG'} || "$ENV{'HOME'}/.ripper.ini";
 my $config = {
@@ -116,8 +117,7 @@ if (@ARGV == 0) {
 sub rip {
     my $dirnum = shift || 0;
 
-    my $cwd = `pwd`;
-    chomp $cwd;
+    my $cwd = getcwd();
 
     my $wav_dir = $config->{'wav_dir'} || 'disk';
     my $dir = File::Spec->catdir($cwd, $wav_dir);
@@ -190,11 +190,8 @@ sub norm {
 }
 
 sub merge {
-    my $cwd = `pwd`;
-    chomp $cwd;
-
     my $wav_dir = $config->{'wav_dir'} || 'disk';
-    my $dir = File::Spec->catdir($cwd, $wav_dir);
+    my $dir = File::Spec->catdir(getcwd(), $wav_dir);
 
     # TODO make configurable -- only works for cdparanoia
     my $track_count = () = glob(
