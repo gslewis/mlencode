@@ -1,11 +1,87 @@
 #!/usr/bin/perl -w
-
 package ripper;
+
+=head1 NAME
+
+ripper.pl - Rips and normalizes single- or multi-disk albums.
+
+=head1 SYNOPSIS
+
+    # Rip and normalize a single disk album
+    perl ripper.pl
+
+    # Rip the first disk of an album
+    perl ripper.pl 1
+    # ... swap disks and rip disk two.
+    perl ripper.pl 2
+    # Merge the two disks into a single set of tracks and normalize
+    perl ripper.pl merge
+
+    # Normalise a set of WAVs (created by flac2wav.pl)
+    perl ripper.pl norm
+
+=head1 DESCRIPTION
+
+Produces a set of normalized WAV files in the 'wav_dir' directory ready for
+use by the encoder.pl script.
+
+The main feature of this script is to simplify the process of ripping
+multi-disk CDs.  The steps are: 1). rip each disk into separate directories,
+2). rename tracks in the 2nd, 3rd, etc disks to produce a single set of
+consecutive tracks, 3). normalize the entire batch of tracks.  While it is
+still necessary to rip each disk separately, the remaining steps
+(renaming and normalizing) are performed together.
+
+=head2 Configuration Options
+
+The script is configured by the ~/.ripper.ini configuration file (simple
+'ini' format).  Global options (preceding an [section]s) are shared by other
+scripts.  The ripper.pl options are in the [ripper] section.
+
+=over
+
+=item wav_dir (global)
+
+The directory in which the ripped disks are located.  If ripping a single
+disk, the WAV files are located in this directory.  If ripping a multi-disk,
+each disk is a sub-directory of this directory, and the WAVs are moved to this
+directory when merging.  Default: disk
+
+=item norm_file (global)
+
+The name of the file in the 'wav_dir' that contains the normalization level
+for the batch of WAVs.  Default: norm_result
+
+=item ripper [ripper]
+
+Command used for ripping.
+
+Default: /usr/bin/cdparanoia
+
+=item ripper_opts [ripper]
+
+Options passed to the ripper command.
+
+Default: -v -w -B -d /dev/cdrom
+
+=item normalize [ripper]
+
+Command used for normalizing.
+
+Default: /usr/bin/normalize
+
+=item normalize_opts [ripper]
+
+Options passed to the normalize command.
+
+Default: -b --no-progress -a -11dbFS
+
+=back
+
+=cut
 
 use feature ':5.12';
 use strict;
-
-#use Data::Dumper;
 use File::Copy;
 use File::Spec;
 use File::Path;
@@ -13,6 +89,7 @@ use File::Path;
 my $config_file = $ENV{'RIPPER_CFG'} || "$ENV{'HOME'}/.ripper.ini";
 my $config = {
     'wav_dir' => 'disk',
+    'norm_file' => 'norm_result',
     'ripper' => '/usr/bin/cdparanoia',
     'ripper_opts' => '-v -w -B -d /dev/cdrom',
     'normalize' => '/usr/bin/normalize',
@@ -83,9 +160,7 @@ sub rip {
 sub norm {
     my $dir = shift || $config->{'wav_dir'} || 'disk';
 
-    my $norm_file = File::Spec->catfile(
-        $dir, $config->{'norm_file'} || 'norm_result'
-    );
+    my $norm_file = File::Spec->catfile($dir, $config->{'norm_file'});
     unlink $norm_file;
 
     my $wav_path = File::Spec->catfile($dir, '*.wav');

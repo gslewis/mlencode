@@ -1,11 +1,106 @@
 #!/usr/bin/perl -w
-
 package encoder;
+
+=head1 NAME
+
+encoder.pl - Encodes WAV files to ogg, mp3 or flac.
+
+=head1 SYNOPSIS
+
+    # Encode using defaults from ~/.ripper.ini and data file 'data'
+    perl encoder.pl
+
+    # Encode to given format, album data file 'data'
+    perl encoder.pl ogg
+    perl encoder.pl mp3
+    perl encoder.pl flac
+
+    # Encode to ogg using album data file 'data.album'
+    perl encoder.pl ogg data.album
+
+=head1 DESCRIPTION
+
+Used in conjunction with ripper.pl, encodes the album of normalized WAV files
+'wav_dir' to the selected format.  Album data is defined in the album data
+file.  The encoded audio files are created in the ARTIST/YEAR_ALBUM directory
+in the 'encode_output_dir'.  Configured by the ~/.ripper.ini configuration
+file.
+
+Sets the standard tags (artist, album, year, track, tracknumber) plus an
+'encoded on' comment and, if possible, a 'normalization' comment detailing the
+normalization adjustment that has been applied to the track.
+
+Uses oggenc for ogg, lame for mp3 and flac for flac.
+
+=head2 Album Data File
+
+By default album data is read from the 'data' file in the current directory.
+An alternate data file can be specified on the command line as the 2nd
+argument -- requires that the output audio format is specified.
+
+The format of the data file is:
+
+    BAND=Peter Gabriel
+    ALBUM=So
+    YEAR=1986
+    Red Rain
+    Sledgehammer
+    Don't Give Up
+    ...
+
+Blank lines and comments are ignored.
+
+=head2 Configuration Options
+
+The script is configured via the ~/.ripper.ini configuration file.  Uses the
+standard 'ini' file format.  Global settings are shared with other scripts,
+encoder-specific settings are in the [encoder] section. The following options
+can be set:
+
+=over
+
+=item wav_dir (global)
+
+The directory in which the normalized WAV files are located, as well as the
+'norm_file' file (see ripper.pl).  Default: disk
+
+=item norm_file (global)
+
+The name of the file in the 'wav_dir' that contains the normalization level
+for the batch of WAVs.  Default: norm_result
+
+=item encode_output_dir [encoder]
+
+The directory to which the encoded files are written.  If not absolute, the
+path is relative to the user's home directory.  Default: music
+
+=item wav_type [encoder]
+
+The filename format of the WAV files.  May be either 'cdparanoia' or
+'cdda2wav'.  If not specified, the WAV type is detected by examining the
+contents of the 'wav_dir'.
+
+=item wav_delete [encoder]
+
+If set to one of the supported audio formats (ogg, mp3 or flac) then after a
+WAV file is encoded to this format it is deleted.
+
+=item author [encoder]
+
+Optional string value used to prefix the 'encoded on' comment.  By default the
+author is 'username@hostname'.
+
+=item ogg_options, mp3_options, flac_options [encoder]
+
+The command-line parameters passed to the ogg (oggenc), mp3 (lame) and flac
+(flac) encoders.  Do not include comment options.
+
+=back
+
+=cut
 
 use feature ':5.12';
 use strict;
-
-#use Data::Dumper;
 use File::Spec;
 use File::Path;
 
@@ -355,7 +450,7 @@ sub init {
 
     require 'common.pl';
     my $config_file = $ENV{'RIPPER_CFG'} || "$ENV{'HOME'}/.ripper.ini";
-    $config = common::load_ini('encode', $config, $config_file);
+    $config = common::load_ini('encoder', $config, $config_file);
 
     set_encoded_on($config);
     set_norm_level($config);
@@ -396,7 +491,7 @@ sub set_norm_level {
     close $fh;
 
     chomp $norm_level;
-    die "Missing normalisation level\n" unless length $norm_level;
+    die "Missing normalization level\n" unless length $norm_level;
 
     $config->{'norm_level'} = $norm_level;
 
