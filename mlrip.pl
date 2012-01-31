@@ -1,24 +1,24 @@
 #!/usr/bin/perl -w
-package ripper;
+package mlrip;
 
 =head1 NAME
 
-ripper.pl - Rips and normalizes single- or multi-disk albums.
+mlrip.pl - Rips and normalizes single- or multi-disk albums.
 
 =head1 SYNOPSIS
 
     # Rip and normalize a single disk album
-    perl ripper.pl
+    perl mlrip.pl
 
     # Rip the first disk of an album
-    perl ripper.pl 1
+    perl mlrip.pl 1
     # ... swap disks and rip disk two.
-    perl ripper.pl 2
+    perl mlrip.pl 2
     # Merge the two disks into a single set of tracks and normalize
-    perl ripper.pl merge
+    perl mlrip.pl merge
 
     # Normalise a set of WAVs (created by flac2wav.pl)
-    perl ripper.pl norm
+    perl mlrip.pl norm
 
 =head1 DESCRIPTION
 
@@ -34,9 +34,9 @@ still necessary to rip each disk separately, the remaining steps
 
 =head2 Configuration Options
 
-The script is configured by the ~/.ripper.ini configuration file (simple
+The script is configured by the ~/.mlencode.ini configuration file (simple
 'ini' format).  Global options (preceding an [section]s) are shared by other
-scripts.  The ripper.pl options are in the [ripper] section.
+scripts.  The mlrip.pl options are in the [mlrip] section.
 
 =over
 
@@ -52,25 +52,25 @@ directory when merging.  Default: disk
 The name of the file in the 'wav_dir' that contains the normalization level
 for the batch of WAVs.  Default: norm_result
 
-=item ripper [ripper]
+=item ripper [mlrip]
 
 Command used for ripping.
 
 Default: /usr/bin/cdparanoia
 
-=item ripper_opts [ripper]
+=item ripper_opts [mlrip]
 
 Options passed to the ripper command.
 
 Default: -v -w -B -d /dev/cdrom
 
-=item normalize [ripper]
+=item normalize [mlrip]
 
 Command used for normalizing.
 
 Default: /usr/bin/normalize
 
-=item normalize_opts [ripper]
+=item normalize_opts [mlrip]
 
 Options passed to the normalize command.
 
@@ -87,7 +87,7 @@ use File::Spec;
 use File::Path;
 use Cwd;
 
-my $config_file = $ENV{'RIPPER_CFG'} || "$ENV{'HOME'}/.ripper.ini";
+my $config_file = $ENV{'MLENCODE_INI'} || "$ENV{'HOME'}/.mlencode.ini";
 my $config = {
     'wav_dir' => 'disk',
     'norm_file' => 'norm_result',
@@ -96,8 +96,8 @@ my $config = {
     'normalize' => '/usr/bin/normalize',
     'normalize_opts' => '-b --no-progress -a -11dbFS',
 };
-require 'common.pl';
-$config = common::load_ini('ripper', $config, $config_file);
+require 'mlcommon.pl';
+$config = mlcommon::load_ini('mlrip', $config, $config_file);
 
 if (@ARGV == 0) {
     # single-disk norm
@@ -234,7 +234,7 @@ sub merge {
 
 sub usage {
     say <<USAGE
-Usage: perl ripper.pl [<num>|merge|norm]
+Usage: perl mlrip.pl [<num>|merge|norm]
 USAGE
 }
 

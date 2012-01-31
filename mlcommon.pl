@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
-
-package common;
+package mlcommon;
 
 sub load_ini {
     my $section = shift;

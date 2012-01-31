@@ -1,22 +1,22 @@
 #!/usr/bin/perl -w
-package encoder;
+package mlencode;
 
 =head1 NAME
 
-encoder.pl - Encodes WAV files to ogg, mp3 or flac.
+mlencode.pl - Encodes WAV files to ogg, mp3 or flac.
 
 =head1 SYNOPSIS
 
     # Encode using defaults from ~/.ripper.ini and data file 'data'
-    perl encoder.pl
+    perl mlencode.pl
 
     # Encode to given format, album data file 'data'
-    perl encoder.pl ogg
-    perl encoder.pl mp3
-    perl encoder.pl flac
+    perl mlencode.pl ogg
+    perl mlencode.pl mp3
+    perl mlencode.pl flac
 
     # Encode to ogg using album data file 'data.album'
-    perl encoder.pl ogg data.album
+    perl mlencode.pl ogg data.album
 
 =head1 DESCRIPTION
 
@@ -54,7 +54,7 @@ Blank lines and comments are ignored.
 
 The script is configured via the ~/.ripper.ini configuration file.  Uses the
 standard 'ini' file format.  Global settings are shared with other scripts,
-encoder-specific settings are in the [encoder] section. The following options
+encoder-specific settings are in the [mlencode] section. The following options
 can be set:
 
 =over
@@ -69,28 +69,28 @@ The directory in which the normalized WAV files are located, as well as the
 The name of the file in the 'wav_dir' that contains the normalization level
 for the batch of WAVs.  Default: norm_result
 
-=item encode_output_dir [encoder]
+=item encode_output_dir [mlencode]
 
 The directory to which the encoded files are written.  If not absolute, the
 path is relative to the user's home directory.  Default: music
 
-=item wav_type [encoder]
+=item wav_type [mlencode]
 
 The filename format of the WAV files.  May be either 'cdparanoia' or
 'cdda2wav'.  If not specified, the WAV type is detected by examining the
 contents of the 'wav_dir'.
 
-=item wav_delete [encoder]
+=item wav_delete [mlencode]
 
 If set to one of the supported audio formats (ogg, mp3 or flac) then after a
 WAV file is encoded to this format it is deleted.
 
-=item author [encoder]
+=item author [mlencode]
 
 Optional string value used to prefix the 'encoded on' comment.  By default the
 author is 'username@hostname'.
 
-=item ogg_options, mp3_options, flac_options [encoder]
+=item ogg_options, mp3_options, flac_options [mlencode]
 
 The command-line parameters passed to the ogg (oggenc), mp3 (lame) and flac
 (flac) encoders.  Do not include comment options.
@@ -152,7 +152,7 @@ my $wav_type = detect_batch();
 
 my $start_time = time;
 
-encoder($format, $wav_type, $album_dir, $album_data);
+mlencode::encoder($format, $wav_type, $album_dir, $album_data);
 
 my $sec = time - $start_time;
 my $ftime = sprintf("%d:%02d:%02d", $sec/3600, ($sec/60)%60, $sec%60);
@@ -450,9 +450,9 @@ sub sanitize {
 sub init {
     my $config = shift || {};
 
-    require 'common.pl';
-    my $config_file = $ENV{'RIPPER_CFG'} || "$ENV{'HOME'}/.ripper.ini";
-    $config = common::load_ini('encoder', $config, $config_file);
+    require 'mlcommon.pl';
+    my $config_file = $ENV{'MLENCODE_INI'} || "$ENV{'HOME'}/.ripper.ini";
+    $config = mlcommon::load_ini('mlencode', $config, $config_file);
 
     set_encoded_on($config);
     set_norm_level($config);

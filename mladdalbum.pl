@@ -1,23 +1,23 @@
 #!/usr/bin/perl -w
-package addalbum;
+package mladdalbum;
 
 =head1 NAME
 
-addalbum.pl - Hard links album files in device directory.
+mladdalbum.pl - Hard links album files in device directory.
 
 =head1 SYNOPSIS
 
     # Get list of available devices
-    perl addalbum.pl
+    perl mladdalbum.pl
 
     # Add single album to J3 device
-    perl addalbum.pl j3 music/Peter_Gabriel/1986_So
+    perl mladdalbum.pl j3 music/Peter_Gabriel/1986_So
 
 =head1 DESCRIPTION
 
 This script is used to manage a library for portable audio devices that can be
 mounted as conventional file systems.  The main music library is located in,
-say, the '~/music' directory.  Albums are created here using the ripper.pl and
+say, the '~/music' directory.  Albums are created here using the mlrip.pl and
 encoder.pl scripts.
 
 Separate libraries of albums are maintained for each device so the sync
@@ -26,24 +26,24 @@ album in the device libraries, we use hard links to the main music library.
 
 =head2 Configuration Options
 
-The following configuration options are mandatory in the [addalbum] section of
-the ~/.ripper.ini configuration file.
+The following configuration options are mandatory in the global section of the
+~/.mlencode.ini configuration file (shared by the sync.pl script).
 
 =over
 
-=item devices_dir [addalbum]
+=item devices (global)
+
+Comma-separated list of devices.  Each name corresponds to a sub-directory of
+the 'devices_dir.  Used by the sync.pl script as well.
+
+Example: devices = J3,I9
+
+=item devices_dir (global)
 
 The directory in which the device libraries are located.  If not an absolute
 path is relative to the current directory.
 
 Example: devices_dir = media/devices
-
-=item devices [addalbum]
-
-Comma-separated list of devices.  Each name corresponds to a sub-directory of
-the 'devices_dir.
-
-Example: devices = J3,I9
 
 =back
 
@@ -56,16 +56,13 @@ use File::Glob;
 use File::Spec;
 use Cwd;
 
-# Add the script dir to @INC so we can load common.pl
+# Add the script dir to @INC so we can load mlcommon.pl
 push @INC, dirname($0);
 
-my $config = {
-    # no defaults
-};
-$config = init($config);
+my $config = init();
 
 if (@ARGV == 0) {
-    say "perl addalbum.pl <device> <album1> <album2> ...";
+    say "perl mladdalbum.pl <device> <album1> <album2> ...";
     say "Devices: " . join ', ', keys(%{$config->{'devices'}});
     exit;
 }
@@ -175,10 +172,10 @@ sub get_dest_dir {
 sub init {
     my $config = shift || {};
 
-    my $config_file = $ENV{'RIPPER_CFG'} || "$ENV{'HOME'}/.ripper.ini";
+    my $config_file = $ENV{'RIPPER_CFG'} || "$ENV{'HOME'}/.mlencode.ini";
 
-    require 'common.pl';
-    $config = common::load_ini('addalbum', $config, $config_file);
+    require 'mlcommon.pl';
+    $config = mlcommon::load_ini('mladdalbum', $config, $config_file);
 
     die "Missing 'devices_dir'\n" unless defined $config->{'devices_dir'};
     die "Missing 'devices'\n" unless defined $config->{'devices'};
