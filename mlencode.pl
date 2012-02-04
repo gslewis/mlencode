@@ -7,7 +7,7 @@ mlencode.pl - Encodes WAV files to ogg, mp3 or flac.
 
 =head1 SYNOPSIS
 
-    # Encode using defaults from ~/.ripper.ini and data file 'data'
+    # Encode using defaults from ~/.mlencode.ini and data file 'data'
     perl mlencode.pl
 
     # Encode to given format, album data file 'data'
@@ -23,7 +23,7 @@ mlencode.pl - Encodes WAV files to ogg, mp3 or flac.
 Used in conjunction with ripper.pl, encodes the album of normalized WAV files
 'wav_dir' to the selected format.  Album data is defined in the album data
 file.  The encoded audio files are created in the ARTIST/YEAR_ALBUM directory
-in the 'encode_output_dir'.  Configured by the ~/.ripper.ini configuration
+in the 'encode_output_dir'.  Configured by the ~/.mlencode.ini configuration
 file.
 
 Sets the standard tags (artist, album, year, track, tracknumber) plus an
@@ -48,11 +48,36 @@ The format of the data file is:
     Don't Give Up
     ...
 
-Blank lines and comments are ignored.
+Lines starting with '#' are comments.  Blank lines and comments are ignored.
+
+It is possible to include the artist and album name in the track description.
+Use '%%' to separate the album title from the track and use '@@' to separate
+the artist from the track:
+
+    # A 'best of' album for a single artist: album%%track
+    BAND=Tom Petty & The Heartbreakers
+    ALBUM=Greatest Hits
+    YEAR=1993
+    Tom Petty & The Heartbreakers%%Breakdown
+    Damn The Torpedoes%%Refugee
+    Full Moon Fever%%Free Fallin'
+    ...
+
+    # A 'various artists' album: artist@@track
+    BAND=Various
+    ALBUM=Heavy Metal
+    YEAR=1981
+    Sammy Hagar@@Heavy Metal
+    Blue öyster Cult@@Veteran Of The Psychic Wars
+    Cheap Trick@@Reach Out
+    ...
+
+If you want to specify artist and album in the track the pattern is
+'artist@@album%%track'.
 
 =head2 Configuration Options
 
-The script is configured via the ~/.ripper.ini configuration file.  Uses the
+The script is configured via the ~/.mlencode.ini configuration file.  Uses the
 standard 'ini' file format.  Global settings are shared with other scripts,
 encoder-specific settings are in the [mlencode] section. The following options
 can be set:
@@ -218,8 +243,8 @@ sub encoder {
         }
 
         $settings->{'index'} = $track_count;
-        $settings->{'artist'} = $album_data->{'artist'} unless $artist;
-        $settings->{'album'} = $album_data->{'album'} unless $album;
+        $settings->{'artist'} = $artist || $album_data->{'artist'};
+        $settings->{'album'} = $album || $album_data->{'album'};
         $settings->{'track'} = $track;
 
         my $enc_file = sprintf("%02d_%s.%s",
@@ -451,7 +476,7 @@ sub init {
     my $config = shift || {};
 
     require 'mlcommon.pl';
-    my $config_file = $ENV{'MLENCODE_INI'} || "$ENV{'HOME'}/.ripper.ini";
+    my $config_file = $ENV{'MLENCODE_INI'} || "$ENV{'HOME'}/.mlencode.ini";
     $config = mlcommon::load_ini('mlencode', $config, $config_file);
 
     set_encoded_on($config);
