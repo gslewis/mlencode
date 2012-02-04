@@ -21,6 +21,8 @@ the mounted player, I can maintain the contents of my players.
 Configured by the ~/.mlencode.ini configuration file.  Copy the mlencode.ini
 sample configuration file and modify as required.
 
+The main scripts contain basic documentation comments in perldoc format.
+
 Licence
 -------
 All files are public domain (2011)
