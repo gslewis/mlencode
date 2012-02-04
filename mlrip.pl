@@ -126,7 +126,7 @@ sub rip {
     }
 
     if ($dirnum > 0) {
-        $dir .= $dirnum;
+        $dir = File::Spec->catdir($dir, $dirnum);
         if (-e $dir) {
             die "multi-norm: directory exists: $dir\n";
         } else {
@@ -206,7 +206,7 @@ sub merge {
     my $disknum = 1;
     my $tracknum = 0;
     while (1) {
-        my $disk_dir = $dir . $disknum;
+        my $disk_dir = File::Spec->catdir($dir, $disknum);
         last unless -d $disk_dir;
 
         my @tracks = glob(
@@ -216,7 +216,9 @@ sub merge {
 
         foreach my $file (@tracks) {
             ++$tracknum;
-            my $dest_file = $dir . sprintf("track%02d.cdda.wav", $tracknum);
+            my $dest_file = File::Spec->catfile(
+                $dir, sprintf("track%02d.cdda.wav", $tracknum)
+            );
             move($file, $dest_file);
         }
 
