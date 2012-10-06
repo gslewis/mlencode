@@ -25,7 +25,17 @@ sub load_ini {
         if ($common_section || $in_section) {
             my ($key, $value) = split(/\s*=\s*/);
 
-            $config->{$key} = $value;
+            # Check for key in format: key[index] = value
+            if ($key =~ /^\s*(\w+)\[(\w+)\]$/) {
+                $key = $1;
+                $index = $2;
+
+                $config->{$key} = {} unless exists($config->{$key});
+                $config->{$key}->{$index} = $value;
+
+            } else {
+                $config->{$key} = $value;
+            }
         }
     }
     close(INPUT);

@@ -25,6 +25,6 @@ The main scripts contain basic documentation comments in perldoc format.
 
 Licence
 -------
-All files are public domain (2011)
+All files are public domain (2011-2012)
 
 Geoff Lewis <gsl@gslsrc.net>
