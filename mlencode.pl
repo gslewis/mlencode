@@ -467,7 +467,7 @@ sub sanitize {
     s/(\d+)"/$1in/g;  # Replace 'inch' numbers with string
     s/\&/And/g;       # Replace '&' with 'And'
     s/\//--/g;        # Replace slash with double-dash
-    s/[,"'?!.:%#*]//g; # Strip forbidden characters
+    s/[\[\],"'?!.:%#*]//g; # Strip forbidden characters
 
     return $_;
 }
