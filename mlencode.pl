@@ -124,10 +124,12 @@ The command-line parameters passed to the ogg (oggenc), mp3 (lame) and flac
 
 =cut
 
-use feature ':5.12';
+use 5.012;
 use strict;
 use File::Spec;
 use File::Path;
+
+require 'mlcommon.pl';
 
 my @FORMATS = ('ogg', 'mp3', 'flac');
 
@@ -171,7 +173,7 @@ my $config = {
 $config = init($config);
 
 
-my $album_data = get_album_data($data_file);
+my $album_data = mlcommon::get_album_data($data_file);
 my $album_dir = get_album_dir($album_data);
 my $wav_type = detect_batch();
 
@@ -421,44 +423,6 @@ sub detect_batch {
     die "No wav batch found in $wav_dir\n";
 }
 
-sub get_album_data {
-    my $data_file = shift;
-
-    my %data = ();
-    my @tracks = ();
-
-    open my $fh, "< $data_file" or die "Failed to open $data_file: $!";
-    while (<$fh>) {
-        chomp;
-        next if /^\s*$/;
-        next if /^#/;
-
-        if (/^(BAND|ARTIST)=(.*)$/i) {
-            $data{'artist'} = $2;
-        } elsif (/^ALBUM=(.*)$/i) {
-            $data{'album'} = $1;
-        } elsif (/^YEAR=(.*)$/i) {
-            $data{'year'} = $1;
-        } else {
-            push @tracks, $_;
-        }
-    }
-    close $fh;
-
-    my @missing = ();
-    push @missing, 'artist' unless $data{'artist'};
-    push @missing, 'album' unless $data{'album'};
-    push @missing, 'year' unless $data{'year'};
-    push @missing, 'tracks' unless @tracks > 0;
-    if (@missing > 0) {
-        die "Album data missing " . join(', ', @missing) . "\n";
-    }
-
-    $data{'tracks'} = \@tracks;
-
-    return \%data;
-}
-
 sub sanitize {
     local $_ = shift;
 
@@ -475,7 +439,6 @@ sub sanitize {
 sub init {
     my $config = shift || {};
 
-    require 'mlcommon.pl';
     my $config_file = $ENV{'MLENCODE_INI'} || "$ENV{'HOME'}/.mlencode.ini";
     $config = mlcommon::load_ini('mlencode', $config, $config_file);
 

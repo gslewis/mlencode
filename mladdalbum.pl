@@ -49,8 +49,8 @@ Example: devices_dir = media/devices
 
 =cut
 
+use 5.012;
 use strict;
-use feature ':5.12';
 use File::Basename;
 use File::Glob;
 use File::Spec;

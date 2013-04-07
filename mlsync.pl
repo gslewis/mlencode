@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 package mlsync;
 
+use 5.012;
 use strict;
-use feature ':5.12';
 
 if (@ARGV == 0) {
     usage_and_die();

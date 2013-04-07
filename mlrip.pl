@@ -80,7 +80,7 @@ Default: -b --no-progress -a -11dbFS
 
 =cut
 
-use feature ':5.12';
+use 5.012;
 use strict;
 use File::Copy;
 use File::Spec;
