@@ -131,12 +131,13 @@ use File::Path;
 
 require 'mlcommon.pl';
 
-my @FORMATS = ('ogg', 'mp3', 'flac');
+my @FORMATS = ('ogg', 'mp3', 'flac', 'wv');
 
 my $ENCODERS = {
     ogg => \&encode_ogg,
     mp3 => \&encode_mp3,
     flac => \&encode_flac,
+    wv => \&encode_wv,
 };
 
 my $WAV_TYPES = {
@@ -351,6 +352,32 @@ sub encode_flac {
 
     if (defined $settings->{'norm_level'}) {
         push @cmd, ('-T', 'NORMALISATION=' . $settings->{'norm_level'});
+    }
+
+    push @cmd, ('-o', $outfile);
+    push @cmd, $infile;
+
+    return @cmd;
+}
+
+sub encode_wv {
+    my ($infile, $outfile, $settings) = @_;
+
+    my @cmd = qw(wavpack);
+
+    if (defined $config->{'wv_options'}) {
+        push @cmd, split(/\s+/, $config->{'wv_options'});
+    }
+
+    push @cmd, ('-w', 'artist=' . $settings->{'artist'});
+    push @cmd, ('-w', 'album=' . $settings->{'album'});
+    push @cmd, ('-w', 'title=' . $settings->{'track'});
+    push @cmd, ('-w', 'year=' . $settings->{'year'});
+    push @cmd, ('-w', 'track=' . $settings->{'index'});
+    push @cmd, ('-w', 'ENCODED_ON=' . $settings->{'encoded_on'});
+
+    if (defined $settings->{'norm_level'}) {
+        push @cmd, ('-w', 'NORMALISATION=' . $settings->{'norm_level'});
     }
 
     push @cmd, ('-o', $outfile);
