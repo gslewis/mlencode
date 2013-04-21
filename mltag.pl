@@ -156,3 +156,36 @@ sub set_tags_ogg {
     say "Modified " . join(', ', @$changed) . " in $file";
     system @cmd;
 }
+
+sub get_tags_flac {
+    my $file = shift;
+
+    my %tags = map {
+        chomp;
+        split /=/, $_;
+    } `metaflac --export-tags-to=- "$file"`;
+
+    $tags{'year'} = delete $tags{'date'};
+
+    return \%tags;
+}
+
+sub set_tags_flac {
+    my ($file, $tags, $changed) = @_;
+
+    # Remove all tags (changed or otherwise) and re-import all.  Otherwise if
+    # we just import the changed tags, we need to remove them first.
+    open(my $fh, "|-", "metaflac --remove-all-tags --import-tags-from=- \"$file\"")
+        or die "Could not fork: $!\n";
+
+    # Only need to pass changed tags.  Other tags are unmodified.
+    for my $tag (keys %$tags) {
+        my $name = $tag eq 'year' ? 'date' : $tag;
+        my $value = $tags->{$tag};
+
+        print $fh "$name=$value\n";
+    }
+    close($fh) or die "Could not close: $!\n";
+
+    say "Modified " . join(', ', @$changed) . " in $file";
+}
