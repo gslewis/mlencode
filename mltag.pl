@@ -117,7 +117,7 @@ sub update_tags {
     my @changed = ();
 
     for my $tag (keys %$new_tags) {
-        if ($tags->{$tag} ne $new_tags->{$tag}) {
+        if (defined $tags->{$tag} &&  $tags->{$tag} ne $new_tags->{$tag}) {
             $tags->{$tag} = $new_tags->{$tag};
             push @changed, $tag;
         }
@@ -160,9 +160,12 @@ sub set_tags_ogg {
 sub get_tags_flac {
     my $file = shift;
 
+    # Ensure all tag names are lowercase.
     my %tags = map {
         chomp;
-        split /=/, $_;
+        my ($k, $v) = split /=/, $_;
+        $k = lc $k;
+        ($k, $v);
     } `metaflac --export-tags-to=- "$file"`;
 
     $tags{'year'} = delete $tags{'date'};
