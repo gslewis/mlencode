@@ -82,7 +82,7 @@ sub get_album_data {
 }
 
 sub get_track_data {
-    my $_ = shift;
+    my $track = shift;
 
     my %data = map { $_ => undef; } qw(artist album track);
 
@@ -94,18 +94,18 @@ sub get_track_data {
     #   album%%track
     #   artist@@album%%track
 
-    if (/^(.+)@@(.*)%%(.*)$/) {
+    if ($track =~ /^(.+)@@(.*)%%(.*)$/) {
         $data{'artist'} = $1;
         $data{'album'} = $2;
         $data{'track'} = $3;
-    } elsif (/^(.+)@@(.+)$/) {
+    } elsif ($track =~ /^(.+)@@(.+)$/) {
         $data{'artist'} = $1;
         $data{'track'} = $2;
-    } elsif (/^(.+)%%(.+)$/) {
+    } elsif ($track =~ /^(.+)%%(.+)$/) {
         $data{'album'} = $1;
         $data{'track'} = $2;
     } else {
-        $data{'track'} = $_;
+        $data{'track'} = $track;
     }
 
     return \%data;

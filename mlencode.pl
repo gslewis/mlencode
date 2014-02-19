@@ -451,16 +451,16 @@ sub detect_batch {
 }
 
 sub sanitize {
-    local $_ = shift;
+    my $val = shift;
 
-    s/ - /-/g;        # Collapse space-dash-space
-    s/ /_/g;          # Replace spaces with underscores
-    s/(\d+)"/$1in/g;  # Replace 'inch' numbers with string
-    s/\&/And/g;       # Replace '&' with 'And'
-    s/\//--/g;        # Replace slash with double-dash
-    s/[\[\],"'?!.:%#*]//g; # Strip forbidden characters
+    $val =~ s/ - /-/g;             # Collapse space-dash-space
+    $val =~ s/ /_/g;               # Replace spaces with underscores
+    $val =~ s/(\d+)"/$1in/g;       # Replace 'inch' numbers with string
+    $val =~ s/\&/And/g;            # Replace '&' with 'And'
+    $val =~ s/\//--/g;             # Replace slash with double-dash
+    $val =~ s/[\[\],"'?!.:%#*]//g; # Strip forbidden characters
 
-    return $_;
+    return $val;
 }
 
 sub init {

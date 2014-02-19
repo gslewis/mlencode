@@ -175,12 +175,12 @@ sub norm {
             . ' ' . $config->{'normalize_opts'}
             . ' ' . $wav_path;
 
-    local $_ = `$cmd 2>&1`;
+    my $result = `$cmd 2>&1`;
 
     my $adjustment = undef;
-    if (/Applying adjustment of (.*)\.\.\./m) {
+    if ($result =~ /Applying adjustment of (.*)\.\.\./m) {
         $adjustment = $1;
-    } elsif (/Files are already normalized/m) {
+    } elsif ($result =~ /Files are already normalized/m) {
         $adjustment = 'NONE';
     }
 
