@@ -250,6 +250,11 @@ sub encoder {
         $settings->{'album'} = $album || $album_data->{'album'};
         $settings->{'track'} = $track;
 
+        # If the track has own artist, set the 'albumartist' tag.
+        if (defined $artist) {
+            $settings->{'albumartist'} = $album_data->{'artist'};
+        }
+
         my $enc_file = sprintf("%02d_%s.%s",
                             $track_count, sanitize($track), $format);
         my $outfile = File::Spec->catfile(($album_dir, $enc_file));
@@ -301,6 +306,11 @@ sub encode_ogg {
     push @cmd, ('-t', $settings->{'track'});
     push @cmd, ('-d', $settings->{'year'});
     push @cmd, ('-N', $settings->{'index'});
+
+    if (defined $settings->{'albumartist'}) {
+        push @cmd, ('-c', 'albumartist=' . $settings->{'albumartist'});
+    }
+
     push @cmd, ('-c', 'ENCODED_ON=' . $settings->{'encoded_on'});
 
     if (defined $settings->{'norm_level'}) {
@@ -329,6 +339,10 @@ sub encode_mp3 {
     push @cmd, ('--tn', $settings->{'index'});
     push @cmd, ('--tc', 'ENCODED_ON=' . $settings->{'encoded_on'});
 
+    if (defined $settings->{'albumartist'}) {
+        push @cmd, ('--tv', 'TPE2=' . $settings->{'albumartist'});
+    }
+
     push @cmd, ($infile, $outfile);
 
     return @cmd;
@@ -348,6 +362,11 @@ sub encode_flac {
     push @cmd, ('-T', "title=" . $settings->{'track'});
     push @cmd, ('-T', "date=" . $settings->{'year'});
     push @cmd, ('-T', "tracknumber=" . $settings->{'index'});
+
+    if (defined $settings->{'albumartist'}) {
+        push @cmd, ('-T', 'albumartist=' . $settings->{'albumartist'});
+    }
+
     push @cmd, ('-T', 'ENCODED_ON=' . $settings->{'encoded_on'});
 
     if (defined $settings->{'norm_level'}) {
@@ -374,6 +393,11 @@ sub encode_wv {
     push @cmd, ('-w', 'title=' . $settings->{'track'});
     push @cmd, ('-w', 'year=' . $settings->{'year'});
     push @cmd, ('-w', 'track=' . $settings->{'index'});
+
+    if (defined $settings->{'albumartist'}) {
+        push @cmd, ('-w', 'albumartist=' . $settings->{'albumartist'});
+    }
+
     push @cmd, ('-w', 'ENCODED_ON=' . $settings->{'encoded_on'});
 
     if (defined $settings->{'norm_level'}) {
